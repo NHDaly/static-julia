@@ -259,10 +259,14 @@ function julia_compile(julia_program, c_program=nothing, build_dir="builddir", v
             cc = Sys.iswindows() ? "x86_64-w64-mingw32-gcc" : "gcc"
             command = `$(Base.julia_cmd()) --startup-file=no $(joinpath(dirname(Sys.BINDIR), "share", "julia", "julia-config.jl"))`
             flags = `$(Base.shell_split(read(\`$command --allflags\`, String)))`
+            debug != nothing && debug == 2 && (flags = `$flags -g`)
+            optimize != nothing && (flags = `$flags -O$optimize`)
         else
             cc = is_windows() ? "x86_64-w64-mingw32-gcc" : "gcc"
             command = `$(Base.julia_cmd()) --startup-file=no $(joinpath(dirname(JULIA_HOME), "share", "julia", "julia-config.jl"))`
             cflags = `$(Base.shell_split(readstring(\`$command --cflags\`)))`
+            debug != nothing && debug == 2 && (cflags = `$cflags -g`)
+            optimize != nothing && (cflags = `$cflags -O$optimize`)
             ldflags = `$(Base.shell_split(readstring(\`$command --ldflags\`)))`
             ldlibs = `$(Base.shell_split(readstring(\`$command --ldlibs\`)))`
             flags = `$cflags $ldflags $ldlibs`
